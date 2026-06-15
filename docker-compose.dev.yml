@@ -1,11 +1,22 @@
 services:
-  servedash:
+  servedash-dev:
     build: .
-    container_name: servedash
+    container_name: servedash-dev
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./dev-data:/app-data
     environment:
       - PORT=3000
+      # Auto-refresh interval in seconds. 0 = off.
+      - REFRESH_INTERVAL=15
+      # Image update check interval in minutes. 0 = manual only.
+      - UPDATE_CHECK_INTERVAL=0
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-qO-", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

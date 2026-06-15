@@ -4,6 +4,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Servedash</title>
+<link rel="icon" href="favicon.ico" sizes="any"/>
+<link rel="icon" href="servedash-icon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -59,7 +62,8 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
   position:sticky;top:0;z-index:100;
 }
 .logo{display:flex;align-items:center;gap:8px;font-size:.95rem;font-weight:700;letter-spacing:-.3px;margin-right:4px}
-.logo-mark{width:28px;height:28px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.logo-mark{width:28px;height:28px;border-radius:7px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.logo-mark svg{display:block;width:100%;height:100%}
 .gap{flex:1}
 .host-chip{
   display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;
@@ -75,6 +79,10 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 }
 .icon-btn:hover{background:var(--surface3)}
 .icon-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.sort-btns{display:flex;gap:3px;margin-left:4px}
+.sort-btns .icon-btn{width:auto;gap:5px;padding:0 9px}
+.sort-lbl{font-size:.72rem;font-weight:500}
+.sort-dir{font-size:.62rem;opacity:.7}
 .refresh-btn{
   display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:7px;
   background:var(--accent);color:#fff;font-size:.76rem;font-weight:600;
@@ -83,6 +91,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 .refresh-btn:hover{background:var(--accent-h)}
 .refresh-btn:active{transform:scale(.97)}
 .refresh-btn.spinning svg{animation:spin .7s linear infinite}
+.icon-btn.spinning svg{animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* STATS */
@@ -134,6 +143,12 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 }
 @keyframes up{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .card:hover{border-color:var(--border2);box-shadow:var(--shadow)}
+.drag-grip{cursor:grab;color:var(--text3);font-size:1rem;line-height:1;padding:0 2px;user-select:none;flex:none;transition:color .15s}
+.drag-grip:hover{color:var(--text2)}
+.drag-grip:active{cursor:grabbing}
+.list-grip{margin-right:2px}
+.card.dragging,.list-row.dragging{opacity:.4;border-style:dashed;border-color:var(--accent)}
+.card.drop-target,.list-row.drop-target{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
 .card.running{border-top:2px solid var(--green)}
 .card.exited {border-top:2px solid var(--red)}
 .card.paused {border-top:2px solid var(--yellow)}
@@ -158,6 +173,11 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 .sbadge.created{background:rgba(59,130,246,.1);color:var(--accent)}
 .sdot{width:5px;height:5px;border-radius:50%;background:currentColor}
 .sbadge.running .sdot{animation:blink 2s infinite}
+.ubadge{
+  display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:3px 8px;border-radius:5px;
+  font-size:.66rem;font-weight:700;font-family:var(--mono);flex-shrink:0;
+  background:var(--yellow-bg);color:var(--yellow);cursor:default;
+}
 
 .cstats{display:flex;gap:1px;margin:0 14px 11px;background:var(--border);border-radius:7px;overflow:hidden}
 .cs{flex:1;background:var(--surface2);padding:7px 10px}
@@ -310,13 +330,16 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 <body>
 
 <header class="topbar">
-  <div class="logo"><div class="logo-mark">🚀</div>Servedash</div>
+  <div class="logo"><div class="logo-mark"><svg viewBox="0 0 512 512" width="28" height="28"><defs><linearGradient id="logoBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a2030"/><stop offset="1" stop-color="#0d1117"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#logoBg)"/><rect x="116" y="116" width="150" height="120" rx="20" fill="#fbbf24"/><rect x="288" y="116" width="108" height="120" rx="20" fill="#34d399"/><rect x="116" y="258" width="108" height="138" rx="20" fill="#3b82f6"/><rect x="246" y="258" width="150" height="138" rx="20" fill="#8b5cf6"/><circle cx="146" cy="146" r="11" fill="#0d1117"/><circle cx="276" cy="288" r="11" fill="#0d1117"/></svg></div>Servedash</div>
   <div class="gap"></div>
   <div class="host-chip"><div class="live-dot"></div><span id="hostText">connecting…</span></div>
   <a class="icon-btn" href="https://github.com/DestinyJazz/servedash" target="_blank" rel="noopener" title="View on GitHub" style="text-decoration:none">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.21 3.44 9.63 8.21 11.19.6.11.82-.25.82-.56v-2.17c-3.34.71-4.04-1.58-4.04-1.58-.55-1.37-1.34-1.74-1.34-1.74-1.09-.73.08-.72.08-.72 1.2.08 1.84 1.22 1.84 1.22 1.07 1.8 2.81 1.28 3.5.98.11-.76.42-1.28.76-1.58-2.67-.3-5.47-1.31-5.47-5.84 0-1.29.47-2.34 1.24-3.17-.13-.3-.54-1.52.11-3.16 0 0 1.01-.32 3.3 1.21a11.6 11.6 0 0 1 3-.39c1.02 0 2.05.13 3 .39 2.28-1.53 3.29-1.21 3.29-1.21.65 1.64.24 2.86.12 3.16.77.83 1.23 1.88 1.23 3.17 0 4.54-2.81 5.54-5.49 5.83.43.36.81 1.08.81 2.18v3.23c0 .31.22.68.83.56A12.3 12.3 0 0 0 24 12.29C24 5.78 18.63.5 12 .5z"/></svg>
   </a>
   <button class="icon-btn" id="themeBtn" title="Toggle theme">🌙</button>
+  <button class="icon-btn" id="updateCheckBtn" title="Check for image updates">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 19a4.5 4.5 0 0 1-.5-8.97A6 6 0 0 1 17.66 9.5 4 4 0 0 1 17.5 19H6.5z"/><path d="M12 16.5v-5"/><path d="m9.5 13.5 2.5-2.5 2.5 2.5"/></svg>
+  </button>
   <button class="refresh-btn" id="refreshBtn">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
       <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>
@@ -342,6 +365,20 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
     <button class="f-btn on" data-f="all">All<span class="f-count" id="cAll">0</span></button>
     <button class="f-btn" data-f="running">Running<span class="f-count" id="cRun">0</span></button>
     <button class="f-btn" data-f="exited">Stopped<span class="f-count" id="cStop">0</span></button>
+  </div>
+  <div class="sort-btns">
+    <button class="icon-btn" id="sortName" title="Sort by name (A–Z / Z–A)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h11M3 12h7M3 18h4"/><path d="M17 8V5m0 0L15 7m2-2 2 2"/></svg>
+      <span class="sort-lbl" id="sortNameLbl">Name</span>
+    </button>
+    <button class="icon-btn" id="sortUptime" title="Sort by uptime">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <span class="sort-lbl" id="sortUptimeLbl">Uptime</span>
+    </button>
+    <button class="icon-btn" id="sortUpdate" title="Sort by update available">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V8"/><path d="m9 11 3-3 3 3"/><circle cx="12" cy="12" r="9"/></svg>
+      <span class="sort-lbl" id="sortUpdateLbl">Updates</span>
+    </button>
   </div>
   <div class="view-btns">
     <button class="icon-btn active" id="gridBtn" title="Grid view">
@@ -406,6 +443,17 @@ let query   = '';
 let viewMode = localStorage.getItem('sd-view') || 'grid';
 let logId   = null;
 let allLines = [];
+
+/* SORT / ORDER STATE
+   sortMode: 'manual' | 'name' | 'uptime'
+   manualOrder: array of container names in user-defined order (from backend)
+   dir: 'asc' | 'desc' for the active sort button */
+let sortMode = 'manual';
+let manualOrder = [];
+let nameDir = 'asc';
+let uptimeDir = 'desc';
+let refreshTimer = null;
+let updates = {}; // containerName -> { status }
 
 /* THEME */
 const html = document.documentElement;
@@ -479,8 +527,32 @@ async function loadContainers() {
   btn.classList.remove('spinning');
 }
 
+// Check for image updates in the background; re-render badges when ready.
+// Network-bound (hits the registry), so never blocks the main load.
+// manual=true means user clicked the button (show toast + spinner feedback).
+let updateCheckInterval = 0;
+async function loadUpdates(manual = false) {
+  const btn = document.getElementById('updateCheckBtn');
+  if (manual && btn) btn.classList.add('spinning');
+  try {
+    const d = await get('/api/updates');
+    updates = d.updates || {};
+    render();
+    if (manual) {
+      const n = Object.values(updates).filter(u => u.status === 'update').length;
+      if (n > 0) toast(`${n} update${n > 1 ? 's' : ''} available`);
+      else toast('All images up to date');
+    }
+  } catch(e) {
+    if (manual) toast('Update check failed', 'err');
+  }
+  if (manual && btn) btn.classList.remove('spinning');
+}
+
 async function loadAll() {
   await Promise.all([loadInfo(), loadContainers()]);
+  // Only auto-check on load if an interval is configured (0 = strictly manual)
+  if (updateCheckInterval > 0) loadUpdates(false);
 }
 
 /* HELPERS */
@@ -533,6 +605,43 @@ function filtered() {
   });
 }
 
+/* ORDER — apply manual order or an active sort rule */
+function ordered(items) {
+  const list = items.slice();
+  if (sortMode === 'name') {
+    list.sort((a, b) => a.name.localeCompare(b.name));
+    if (nameDir === 'desc') list.reverse();
+    return list;
+  }
+  if (sortMode === 'uptime') {
+    // created is a unix timestamp (seconds); older = longer uptime
+    list.sort((a, b) => a.created - b.created); // oldest first = longest uptime first
+    if (uptimeDir === 'asc') list.reverse();    // asc = shortest uptime first
+    return list;
+  }
+  if (sortMode === 'update') {
+    // containers with an available update first, then by name
+    const rank = (c) => (updates[c.name] && updates[c.name].status === 'update') ? 0 : 1;
+    list.sort((a, b) => {
+      const ra = rank(a), rb = rank(b);
+      if (ra !== rb) return ra - rb;
+      return a.name.localeCompare(b.name);
+    });
+    return list;
+  }
+  // manual: order by saved name list, unknown names fall to the end in original order
+  if (manualOrder.length) {
+    const idx = {};
+    manualOrder.forEach((n, i) => { idx[n] = i; });
+    list.sort((a, b) => {
+      const ia = a.name in idx ? idx[a.name] : Infinity;
+      const ib = b.name in idx ? idx[b.name] : Infinity;
+      return ia - ib;
+    });
+  }
+  return list;
+}
+
 function updateCounts() {
   document.getElementById('cAll').textContent  = containers.length;
   document.getElementById('cRun').textContent  = containers.filter(c=>c.status==='running').length;
@@ -542,13 +651,14 @@ function updateCounts() {
 /* RENDER */
 function render() {
   const wrap = document.getElementById('container');
-  const items = filtered();
+  const items = ordered(filtered());
   if (!items.length) {
     wrap.innerHTML = `<div class="${viewMode === 'grid' ? 'grid' : ''}"><div class="empty"><div class="empty-icon">🔍</div><h3>No containers found</h3><p>Try adjusting your filter or search.</p></div></div>`;
     return;
   }
   wrap.innerHTML = viewMode === 'grid' ? renderGrid(items) : renderList(items);
   wrap.querySelectorAll('.card, .list-row').forEach((el,i) => { el.style.animationDelay = `${i*20}ms`; });
+  attachDrag();
 }
 
 function renderGrid(items) {
@@ -583,14 +693,16 @@ function renderGrid(items) {
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           Open
         </button>`;
-    return `<div class="card ${sc}">
+    return `<div class="card ${sc}" draggable="true" data-name="${esc(c.name)}">
       <div class="ch">
+        <div class="drag-grip" title="Drag to reorder">⠿</div>
         <div class="avatar">${init(c.name)}</div>
         <div class="cmeta">
           <div class="cname" title="${esc(c.name)}">${esc(c.name)}</div>
           <div class="cimage" title="${esc(c.image)}">${esc(c.image)}</div>
         </div>
         <div class="sbadge ${sc}"><div class="sdot"></div>${sLabel(c.status)}</div>
+        ${updates[c.name] && updates[c.name].status === 'update' ? `<div class="ubadge" title="A newer image is available on Docker Hub">↑ Update</div>` : ''}
       </div>
       ${hs ? `<div class="cstats">
         <div class="cs"><div class="cs-label">CPU</div><div class="cs-val">${cpu}%</div><div class="cs-bar"><div class="cs-fill cpu ${barCls(cpu)}" style="width:${Math.min(cpu,100)}%"></div></div></div>
@@ -655,13 +767,14 @@ function renderList(items) {
             Open
           </button>`;
 
-      return `<div class="list-row ${sc}">
+      return `<div class="list-row ${sc}" draggable="true" data-name="${esc(c.name)}">
         <div class="list-name">
+          <div class="drag-grip list-grip" title="Drag to reorder">⠿</div>
           <div class="list-avatar">${init(c.name)}</div>
           <div class="list-cname" title="${esc(c.name)}">${esc(c.name)}</div>
         </div>
         <div class="list-image" title="${esc(c.image)}">${esc(c.image)}</div>
-        <div><div class="sbadge ${sc}"><div class="sdot"></div>${sLabel(c.status)}</div></div>
+        <div><div class="sbadge ${sc}"><div class="sdot"></div>${sLabel(c.status)}</div>${updates[c.name] && updates[c.name].status === 'update' ? ` <span class="ubadge" title="A newer image is available on Docker Hub">↑</span>` : ''}</div>
         <div class="list-stat">${cpu}</div>
         <div class="list-stat">${mem}</div>
         <div class="list-actions">
@@ -763,11 +876,154 @@ document.getElementById('closeModal').addEventListener('click', () => document.g
 document.getElementById('overlay').addEventListener('click', e => { if (e.target === document.getElementById('overlay')) document.getElementById('overlay').classList.remove('open'); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('overlay').classList.remove('open'); });
 
+/* DRAG & DROP REORDER */
+let dragName = null;
+function attachDrag() {
+  const wrap = document.getElementById('container');
+  const els = wrap.querySelectorAll('[draggable="true"]');
+  els.forEach(el => {
+    el.addEventListener('dragstart', e => {
+      dragName = el.dataset.name;
+      el.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      wrap.querySelectorAll('.drop-target').forEach(x => x.classList.remove('drop-target'));
+    });
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (el.dataset.name !== dragName) el.classList.add('drop-target');
+    });
+    el.addEventListener('dragleave', () => el.classList.remove('drop-target'));
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      el.classList.remove('drop-target');
+      const targetName = el.dataset.name;
+      if (!dragName || dragName === targetName) return;
+      reorder(dragName, targetName);
+    });
+  });
+}
+
+// Move dragName to the position of targetName, switch to manual mode, persist
+function reorder(fromName, toName) {
+  // Build the current full visible order as the base
+  const current = ordered(filtered()).map(c => c.name);
+  const from = current.indexOf(fromName);
+  const to = current.indexOf(toName);
+  if (from < 0 || to < 0) return;
+  current.splice(to, 0, current.splice(from, 1)[0]);
+
+  // Merge with any names not currently visible (filtered out) so we don't lose them
+  const hidden = manualOrder.filter(n => !current.includes(n));
+  manualOrder = current.concat(hidden);
+
+  // Switch to manual mode and clear sort button highlights
+  sortMode = 'manual';
+  document.getElementById('sortName').classList.remove('active');
+  document.getElementById('sortUptime').classList.remove('active');
+  document.getElementById('sortUpdate').classList.remove('active');
+  render();
+  saveOrder();
+}
+
+async function saveOrder() {
+  try {
+    await fetch('/api/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order: manualOrder })
+    });
+  } catch {
+    toast('Could not save order', 'err');
+  }
+}
+
+async function loadOrder() {
+  try {
+    const d = await get('/api/order');
+    manualOrder = Array.isArray(d.order) ? d.order : [];
+  } catch {
+    manualOrder = [];
+  }
+}
+
+/* SORT BUTTONS — clicking applies the rule and overrides manual order */
+const sortNameBtn = document.getElementById('sortName');
+const sortUptimeBtn = document.getElementById('sortUptime');
+const sortUpdateBtn = document.getElementById('sortUpdate');
+
+function clearSortActive() {
+  sortNameBtn.classList.remove('active');
+  sortUptimeBtn.classList.remove('active');
+  sortUpdateBtn.classList.remove('active');
+}
+
+function setSortLabels() {
+  document.getElementById('sortNameLbl').innerHTML =
+    'Name' + (sortMode === 'name' ? ` <span class="sort-dir">${nameDir === 'asc' ? 'A–Z' : 'Z–A'}</span>` : '');
+  document.getElementById('sortUptimeLbl').innerHTML =
+    'Uptime' + (sortMode === 'uptime' ? ` <span class="sort-dir">${uptimeDir === 'desc' ? '↓' : '↑'}</span>` : '');
+}
+
+sortNameBtn.addEventListener('click', () => {
+  if (sortMode === 'name') { nameDir = nameDir === 'asc' ? 'desc' : 'asc'; }
+  else { sortMode = 'name'; }
+  clearSortActive();
+  sortNameBtn.classList.add('active');
+  setSortLabels();
+  render();
+});
+
+sortUptimeBtn.addEventListener('click', () => {
+  if (sortMode === 'uptime') { uptimeDir = uptimeDir === 'desc' ? 'asc' : 'desc'; }
+  else { sortMode = 'uptime'; }
+  clearSortActive();
+  sortUptimeBtn.classList.add('active');
+  setSortLabels();
+  render();
+});
+
+sortUpdateBtn.addEventListener('click', () => {
+  sortMode = 'update';
+  clearSortActive();
+  sortUpdateBtn.classList.add('active');
+  setSortLabels();
+  render();
+});
+
+/* CONFIG + AUTO-REFRESH */
+let updateCheckTimer = null;
+async function loadConfig() {
+  try {
+    const d = await get('/api/config');
+    const sec = parseInt(d.refreshInterval, 10) || 0;
+    if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
+    if (sec > 0) {
+      refreshTimer = setInterval(loadAll, sec * 1000);
+    }
+    // image update check interval (minutes). 0 = manual only.
+    const upMin = parseInt(d.updateCheckInterval, 10) || 0;
+    updateCheckInterval = upMin;
+    if (updateCheckTimer) { clearInterval(updateCheckTimer); updateCheckTimer = null; }
+    if (upMin > 0) {
+      updateCheckTimer = setInterval(() => loadUpdates(false), upMin * 60 * 1000);
+    }
+  } catch {}
+}
+
 /* REFRESH */
 document.getElementById('refreshBtn').addEventListener('click', loadAll);
+document.getElementById('updateCheckBtn').addEventListener('click', () => loadUpdates(true));
 
 /* INIT */
-loadAll();
+(async function bootstrap() {
+  await loadOrder();
+  await loadConfig();
+  await loadAll();
+})();
 </script>
 </body>
 </html>
