@@ -11,7 +11,7 @@ services:
     environment:
       - PORT=3000
       # Auto-refresh interval in seconds. 0 = off.
-      - REFRESH_INTERVAL=15
+      - REFRESH_INTERVAL=60
       # Image update check interval in minutes. 0 = manual only.
       - UPDATE_CHECK_INTERVAL=0
     healthcheck:

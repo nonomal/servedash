@@ -4,7 +4,7 @@
 [![GHCR](https://img.shields.io/badge/ghcr.io-servedash-blue?logo=github)](https://github.com/DestinyJazz/servedash/pkgs/container/servedash)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/DestinyJazz/servedash/blob/main/LICENSE)
 
-A simple Docker dashboard I built because Portainer felt too heavy for just wanting to see what's running.
+A simple Docker dashboard I built because Portainer felt too heavy for just wanting to see what's running. A lightweight alternative when you want visibility, not a full management suite.
 
 Auto-discovers all your containers, shows CPU/RAM, lets you tail logs, and opens each service — without leaving the page.
 
@@ -13,12 +13,14 @@ Auto-discovers all your containers, shows CPU/RAM, lets you tail logs, and opens
 ## Features
 
 - Scans all Docker containers automatically (running and stopped)
-- CPU & RAM usage per container
+- CPU & RAM usage per container, with color-coded bars (green / yellow / red by load)
 - Live log viewer with search and filter
 ![Servedash](assets/log.png)
-- Start / Stop / Restart from the dashboard
+- Start / Stop / Restart / Pause / Unpause from a per-container Actions menu
 - Click to open any service — picks the right port if there are multiple
 ![Servedash](assets/port.png)
+- Status filter (Running, Stopped, Paused, Unhealthy) with live counts
+- Detects unhealthy containers (running but failing their healthcheck)
 - Drag cards to reorder, or sort by name, uptime, or available updates
 - Image update detection — flags containers when a newer image is available (Docker Hub, GHCR, lscr.io)
 ![Servedash](assets/update.png)
@@ -104,7 +106,7 @@ Servedash mounts the Docker socket read-only. Don't expose it to the public inte
 [![GHCR](https://img.shields.io/badge/ghcr.io-servedash-blue?logo=github)](https://github.com/DestinyJazz/servedash/pkgs/container/servedash)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/DestinyJazz/servedash/blob/main/LICENSE)
 
-自己搭的 Docker dashboard，因为觉得 Portainer 对于「只是想看看哪些服务在跑」来说太重了。
+自己搭的 Docker dashboard，因为觉得 Portainer 对于「只是想看看哪些服务在跑」来说太重了。一个轻量替代方案，适合只想看状态、不需要完整管理套件的场景。
 
 自动扫描所有 container，显示 CPU/RAM，可以查 logs，一键打开各个服务 — 不需要切换页面。
 
@@ -113,12 +115,14 @@ Servedash mounts the Docker socket read-only. Don't expose it to the public inte
 ## 功能
 
 - 自动扫描所有 Docker container（包括已停止的）
-- 每个 container 的 CPU 和内存使用率
+- 每个 container 的 CPU 和内存使用率，使用条按负载变色（绿 / 黄 / 红）
 - 实时 log 查看器，支持搜索和过滤
 ![Servedash](assets/log.png)
-- 直接从 dashboard 启动 / 停止 / 重启
+- 通过每个容器的 Actions 菜单进行 启动 / 停止 / 重启 / 暂停 / 恢复
 - 点击直接打开服务，有多个 port 时会显示选择菜单
 ![Servedash](assets/port.png)
+- 状态筛选（Running、Stopped、Paused、Unhealthy），带实时计数
+- 检测不健康容器（在运行但健康检查失败）
 - 拖拽卡片排序，或按名称、运行时间、有无更新排序
 - 镜像更新检测 — 有新版镜像时在卡片上标记（Docker Hub、GHCR、lscr.io）
 ![Servedash](assets/update.png)

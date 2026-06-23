@@ -4,6 +4,9 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 
+// Servedash version — keep in sync with the git tag / GHCR image tag on release.
+const VERSION = '1.2.0';
+
 const app = express();
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
@@ -164,7 +167,11 @@ app.use(express.static(path.join(__dirname, '../frontend/public')));
 
 // GET runtime config for the frontend
 app.get('/api/config', (req, res) => {
-  res.json({ refreshInterval: REFRESH_INTERVAL, updateCheckInterval: UPDATE_CHECK_INTERVAL });
+  res.json({
+    version: VERSION,
+    refreshInterval: REFRESH_INTERVAL,
+    updateCheckInterval: UPDATE_CHECK_INTERVAL,
+  });
 });
 
 // GET saved container order (array of container names). Empty array if none.
@@ -289,6 +296,16 @@ app.get('/api/containers', async (req, res) => {
         }
       }
 
+      // Parse healthcheck state from the Status string.
+      // Docker reports health in parentheses, e.g. "Up 2 hours (unhealthy)".
+      // A container can be running AND unhealthy at the same time — State alone
+      // won't tell you, so we read it from Status here.
+      let health = null; // 'healthy' | 'unhealthy' | 'starting' | null (no healthcheck)
+      const st = c.Status || '';
+      if (/\(healthy\)/i.test(st)) health = 'healthy';
+      else if (/\(unhealthy\)/i.test(st)) health = 'unhealthy';
+      else if (/\(health: starting\)/i.test(st)) health = 'starting';
+
       return {
         id: c.Id.substring(0, 12),
         fullId: c.Id,
@@ -296,6 +313,7 @@ app.get('/api/containers', async (req, res) => {
         image: c.Image,
         status: c.State,
         statusText: c.Status,
+        health,
         url,
         port,
         ports: c.Ports,
@@ -354,10 +372,10 @@ app.get('/api/containers/:id/logs', async (req, res) => {
   }
 });
 
-// POST start / stop / restart
+// POST start / stop / restart / pause / unpause
 app.post('/api/containers/:id/:action', async (req, res) => {
   const { id, action } = req.params;
-  if (!['start', 'stop', 'restart'].includes(action)) {
+  if (!['start', 'stop', 'restart', 'pause', 'unpause'].includes(action)) {
     return res.status(400).json({ error: 'Invalid action' });
   }
   try {
@@ -376,5 +394,14 @@ app.get('*', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Servedash running on port ${PORT}`);
+  console.log('');
+  console.log(`  Servedash v${VERSION}`);
+  console.log(`  ────────────────────────────`);
+  console.log(`  Port:                  ${PORT}`);
+  console.log(`  Refresh interval:      ${REFRESH_INTERVAL > 0 ? REFRESH_INTERVAL + 's' : 'off (manual)'}`);
+  console.log(`  Update check interval: ${UPDATE_CHECK_INTERVAL > 0 ? UPDATE_CHECK_INTERVAL + 'm' : 'off (manual)'}`);
+  console.log(`  Data dir:              ${DATA_DIR}`);
+  console.log(`  ────────────────────────────`);
+  console.log(`  Running on http://localhost:${PORT}`);
+  console.log('');
 });
