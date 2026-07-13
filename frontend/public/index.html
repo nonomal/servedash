@@ -209,9 +209,9 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 .cs-label{font-size:.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
 .cs-val{font-size:.82rem;font-weight:600;font-family:var(--mono)}
 .cs-bar{height:3px;background:var(--border2);border-radius:2px;margin-top:4px;overflow:hidden}
-.cs-fill{height:100%;border-radius:2px;transition:width .6s ease,background .3s ease}
-.cs-fill.cpu{background:var(--accent)}
-.cs-fill.mem{background:var(--orange)}
+/* Load-based color tiers: green < 80% <= yellow < 90% <= red.
+   Base color is green; .warn / .hot (set by barCls) override it. */
+.cs-fill{height:100%;border-radius:2px;transition:width .6s ease,background .3s ease;background:var(--green)}
 .cs-fill.warn{background:var(--yellow)}
 .cs-fill.hot{background:var(--red)}
 
@@ -957,9 +957,9 @@ function renderList(items) {
           <div class="list-cname" title="${esc(c.name)}">${esc(c.name)}</div>
         </div>
         <div class="list-image" title="${esc(c.image)}">${esc(c.image)}</div>
-        <div><div class="sbadge ${sc}"><div class="sdot"></div>${sLabel(c)}</div>${updates[c.name] && updates[c.name].status === 'update' ? ` <span class="ubadge" title="A newer image is available on Docker Hub">↑</span>` : ''}</div>
-        <div class="list-stat">${cpu}</div>
-        <div class="list-stat">${mem}</div>
+        <div><div class="sbadge ${sc}" data-field="badge"><div class="sdot"></div>${sLabel(c)}</div>${updates[c.name] && updates[c.name].status === 'update' ? ` <span class="ubadge" title="A newer image is available on Docker Hub">↑</span>` : ''}</div>
+        <div class="list-stat" data-field="cpu-val">${cpu}</div>
+        <div class="list-stat" data-field="mem-val">${mem}</div>
         <div class="list-actions">
           ${listOpenBtn}
           <button class="la logs" onclick="openLogs('${c.fullId}','${esc(c.name)}')">

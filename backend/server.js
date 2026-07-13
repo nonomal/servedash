@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Servedash version — keep in sync with the git tag / GHCR image tag on release.
-const VERSION = '1.2.0';
+const VERSION = '1.2.1';
 
 const app = express();
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
